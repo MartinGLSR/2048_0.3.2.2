@@ -11,6 +11,7 @@ from random import *
 import platform
 
 # constants
+table_color = "#555555"
 colors = {"0": "#777777", "2": "#8a8add", "4": "#7979ff", "8": "#1070e0", "16": "#005ded", "32": "#5a17cd", "64": "#7a19e1", "128": "#8a19e1", "256": "#9011CE", "512": "#9000A5", "1024": "#B10A75", "2048": "#D00060", "4096": "#F01070", "8192": "#FF7700"}
 colors_next_case = {"2": "red", "4": "red"}
 table = [[0, 0, 0, 0],
@@ -40,28 +41,33 @@ color_case = ""
 
 # Cette fonction sera continuée plus tard
 def end_screen():
-    print("")
+    global colors, background
+    colors = {"0": "#aaaaaa", "2": "#aaaaaa", "4": "#aaaaaa", "8": "#aaaaaa", "16": "#aaaaaa", "32": "#aaaaaa", "64": "#aaaaaa", "128": "#aaaaaa", "256": "#aaaaaa", "512": "#aaaaaa", "1024": "#aaaaaa", "2048": "#aaaaaa", "4096": "#aaaaaa", "8192": "#aaaaaa"}
+    background = "#66666"
+
+    frame_text.config(bg=background)
+    frame_score.config(bg=background)
+    frame_table.config(bg=background)
+    window.config(bg=background)
 
 # fonction pour afficher "game over" si l'utilisateur n'a plus de posibilités
 # (servira plus tard pour l'écran de fin)
 def Get_if_end(table):
+
     table_memory = table
     table_base = table
     game_over = True
     for sense in ("Left", "Right", "Up", "Down"):
-        print(sense)
         if sense in ["Up", "Down"]:
             tablex = [[], [], [], []]
         else:
             tablex = []
         Tass_variable = Tass(sense, 0, tablex, table_memory)
-        print(table_memory)
-        print(table_base)
-        print(Tass_variable[0])
         if table_base != Tass_variable[0]:
             game_over = False
     if game_over:
         print("Game_over")
+        end_screen()
 
 
 def replay():
@@ -83,12 +89,10 @@ def Tass(sense, score, table_memory, table):
         if sense == "Up" or sense == "Down":
             for j in range(4):
                 list_cases.append(table[j][i])
-        print(list_cases)
         # enlever les 0
         for k in range(4):
             if 0 in list_cases:
                 list_cases.remove(0)
-        print(list_cases)
         # fusionner les cases si besoins
         if sense == "Right" or sense == "Down":
             list_cases.reverse()
@@ -104,7 +108,6 @@ def Tass(sense, score, table_memory, table):
                 list_cases.remove(0)
         if sense == "Left" or sense == "Up":
             list_cases = tass_4(list_cases)
-        print(list_cases)
         if sense == "Right" or sense == "Down":
             list_cases.reverse()
             list_cases = tass_4(list_cases)
@@ -112,7 +115,6 @@ def Tass(sense, score, table_memory, table):
         # ajouter la ligne au tableau en mémoire
         if sense == "Right" or sense == "Left":
             table_memory.append(list_cases)
-        print(list_cases)
         if sense == "Up" or sense == "Down":
             for m in range(4):
                 table_memory[m].append(list_cases[m])
@@ -218,14 +220,19 @@ window.configure(bg=background)
 window.geometry("850x850")
 frame_text = Frame(window, bg=background)
 frame_text.pack(fill=BOTH, expand=True)
-frame_table = Frame(window, bg="#555555", bd=5)
+frame_table = Frame(window, bg=table_color, bd=5)
 frame_table.pack(padx=15, pady=15)
 frame_score = Frame(frame_text, bg=background)
 frame_score.pack(side=RIGHT, fill=Y)
+frame_menu = Frame(frame_text, bg=background)
+frame_menu.pack()
 label_title = Label(frame_text, text="2048", fg="white", bg=background, font=font_settings)
 label_title.pack(side=LEFT, padx=60)
 label_score = Label(frame_score, text=f"score:{score}", fg="white", bg=background, font=font_settings_score)
 label_score.pack(side=LEFT, padx=30)
+setting_icon = PhotoImage(file="settings-10-64.png")
+button_setting = Button(frame_menu, image=setting_icon, background=background, bd=0)
+button_setting.pack()
 with open("best_score.txt", 'r') as folder:
     label_best_score = Label(frame_score, text=f"meilleur score:{folder.read()}", fg="white", bg=background, font=font_settings_score)
     label_best_score.pack(side=RIGHT, padx=30)
