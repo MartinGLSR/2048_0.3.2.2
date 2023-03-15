@@ -8,15 +8,16 @@ import random
 # moduls
 from tkinter import *
 from random import *
+from tkinter.messagebox import *
 import platform
 
 # constants
 table_color = "#555555"
 colors = {"0": "#777777", "2": "#8a8add", "4": "#7979ff", "8": "#1070e0", "16": "#005ded", "32": "#5a17cd", "64": "#7a19e1", "128": "#8a19e1", "256": "#9011CE", "512": "#9000A5", "1024": "#B10A75", "2048": "#D00060", "4096": "#F01070", "8192": "#FF7700"}
 colors_next_case = {"2": "red", "4": "red"}
-table = [[0, 0, 0, 0],
-         [0, 2, 0, 0],
-         [0, 0, 0, 0],
+table = [[16, 64, 32, 128],
+         [256, 512, 256, 512],
+         [16, 32, 16, 32],
          [0, 0, 0, 0]]
 button_case = [[None, None, None, None],
                [None, None, None, None],
@@ -39,16 +40,24 @@ next_case = [0,0]
 color_case = ""
 # functions
 
+# cette fonction permet d'afficher une fenêtre pour les paramêtres
+def Settings_box():
+    print("settings")
+def end_window():
+    if askyesno("","Vous avez fini. \n recommencer?"):
+        print("recommencer")
+    else:
+        exit()
 # Cette fonction sera continuée plus tard
 def end_screen():
     global colors, background
     colors = {"0": "#aaaaaa", "2": "#aaaaaa", "4": "#aaaaaa", "8": "#aaaaaa", "16": "#aaaaaa", "32": "#aaaaaa", "64": "#aaaaaa", "128": "#aaaaaa", "256": "#aaaaaa", "512": "#aaaaaa", "1024": "#aaaaaa", "2048": "#aaaaaa", "4096": "#aaaaaa", "8192": "#aaaaaa"}
-    background = "#66666"
-
+    background = "#666666"
     frame_text.config(bg=background)
     frame_score.config(bg=background)
     frame_table.config(bg=background)
     window.config(bg=background)
+    #end_window()
 
 # fonction pour afficher "game over" si l'utilisateur n'a plus de posibilités
 # (servira plus tard pour l'écran de fin)
@@ -224,15 +233,13 @@ frame_table = Frame(window, bg=table_color, bd=5)
 frame_table.pack(padx=15, pady=15)
 frame_score = Frame(frame_text, bg=background)
 frame_score.pack(side=RIGHT, fill=Y)
-frame_menu = Frame(frame_text, bg=background)
-frame_menu.pack()
 label_title = Label(frame_text, text="2048", fg="white", bg=background, font=font_settings)
 label_title.pack(side=LEFT, padx=60)
 label_score = Label(frame_score, text=f"score:{score}", fg="white", bg=background, font=font_settings_score)
 label_score.pack(side=LEFT, padx=30)
 setting_icon = PhotoImage(file="settings-10-64.png")
-button_setting = Button(frame_menu, image=setting_icon, background=background, bd=0)
-button_setting.pack()
+button_setting = Button(frame_score, image=setting_icon, background=background, bd=0, activebackground=background, command=Settings_box)
+button_setting.pack(side=RIGHT, padx=30)
 with open("best_score.txt", 'r') as folder:
     label_best_score = Label(frame_score, text=f"meilleur score:{folder.read()}", fg="white", bg=background, font=font_settings_score)
     label_best_score.pack(side=RIGHT, padx=30)
