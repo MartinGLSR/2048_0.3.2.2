@@ -15,9 +15,9 @@ import platform
 table_color = "#555555"
 colors = {"0": "#777777", "2": "#8a8add", "4": "#7979ff", "8": "#1070e0", "16": "#005ded", "32": "#5a17cd", "64": "#7a19e1", "128": "#8a19e1", "256": "#9011CE", "512": "#9000A5", "1024": "#B10A75", "2048": "#D00060", "4096": "#F01070", "8192": "#FF7700"}
 colors_next_case = {"2": "red", "4": "red"}
-table = [[16, 64, 32, 128],
-         [256, 512, 256, 512],
-         [16, 32, 16, 32],
+table = [[0, 0, 0, 0],
+         [0, 0, 0, 0],
+         [0, 0, 0, 0],
          [0, 0, 0, 0]]
 button_case = [[None, None, None, None],
                [None, None, None, None],
@@ -50,13 +50,18 @@ def end_window():
         exit()
 # Cette fonction sera continuée plus tard
 def end_screen():
-    global colors, background
+    global colors, background, colors_next_case
     colors = {"0": "#aaaaaa", "2": "#aaaaaa", "4": "#aaaaaa", "8": "#aaaaaa", "16": "#aaaaaa", "32": "#aaaaaa", "64": "#aaaaaa", "128": "#aaaaaa", "256": "#aaaaaa", "512": "#aaaaaa", "1024": "#aaaaaa", "2048": "#aaaaaa", "4096": "#aaaaaa", "8192": "#aaaaaa"}
     background = "#666666"
     frame_text.config(bg=background)
     frame_score.config(bg=background)
     frame_table.config(bg=background)
+    label_score.config(bg=background)
+    label_title.config(bg=background)
+    label_best_score.config(bg=background)
+    button_setting.config(bg=background)
     window.config(bg=background)
+    colors_next_case = {"2": "#aaaaaa", "4": "#aaaaaa"}
     #end_window()
 
 # fonction pour afficher "game over" si l'utilisateur n'a plus de posibilités
@@ -66,14 +71,20 @@ def Get_if_end(table):
     table_memory = table
     table_base = table
     game_over = True
-    for sense in ("Left", "Right", "Up", "Down"):
-        if sense in ["Up", "Down"]:
-            tablex = [[], [], [], []]
-        else:
-            tablex = []
-        Tass_variable = Tass(sense, 0, tablex, table_memory)
-        if table_base != Tass_variable[0]:
-            game_over = False
+    for i in range(4):
+        #table_memory[i] = tass_4(table_memory)
+        for j in range(len(table_memory) - 1):
+            if table_memory[i][j] == table_memory[i][j + 1]:
+                game_over = False
+    table_memory = [[], [], [], []]
+    for i in range(4):
+        for j in range(4):
+            table_memory[i].append(table[j][i])
+    for i in range(4):
+        #table_memory[i] = tass_4(table_memory)
+        for j in range(len(table_memory) - 1):
+            if table_memory[i][j] == table_memory[i][j + 1]:
+                game_over = False
     if game_over:
         print("Game_over")
         end_screen()
