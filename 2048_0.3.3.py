@@ -1,7 +1,7 @@
 """
 Auteur      :Martin Glauser
 Date        :03.02.2023
-Version     :0.3.2
+Version     :0.3.3
 Desciption  :Création du jeu 2048 en tkinter
 """
 import random
