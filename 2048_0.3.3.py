@@ -334,7 +334,7 @@ window.mainloop()
 # ajouter la les meilleurs scores                                                                   fait
 # aficher la case qui vient d'apparaître                                                            fait
 # ajouter des paramètres                                                                            fait
-# aficher un écran de fin lorsque il n'y a plus de possibilités ou que le joueur a ateint 8192      fait
+# aficher un écran de fin lorsque il n'y a plus de possibilités ou que le joueur a ateint 2048      fait
 # optionnel:
 #   ajouter une annimation de déplacement                                                           à faire
 #   ajouter des coins arrondis aux cases                                                            à faire
