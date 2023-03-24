@@ -17,8 +17,8 @@ table_color = "#555555"
 colors = {"0": "#777777", "2": "#8a8add", "4": "#7979ff", "8": "#1070e0", "16": "#005ded", "32": "#5a17cd", "64": "#7a19e1", "128": "#8a19e1", "256": "#9011CE", "512": "#9000A5", "1024": "#B10A75", "2048": "#D00060", "4096": "#F01070", "8192": "#FF7700"}
 colors_next_case = {"2": "red", "4": "red"}
 # tableau logique
-table = [[0, 0, 0, 0],
-         [0, 0, 0, 0],
+table = [[1024, 0, 0, 0],
+         [0, 0, 1024, 0],
          [0, 0, 0, 0],
          [0, 0, 0, 0]]
 
@@ -47,8 +47,16 @@ str_case_number = ""
 score = 0
 next_case = [0, 0]
 color_case = ""
+win = 0
 # functions
 
+# fonction pour faire apparaitre une messagebox en cas de victoire
+
+def Win_screen():
+    if askyesno("","Vous avez gagné \n Continuer ?"):
+        print("continuer")
+    else:
+        window.quit()
 # fonction pour mettre à jour les couleurs de fond
 def refresh_ground():
     frame_text.config(bg=background)
@@ -143,6 +151,7 @@ def Get_key(event):
 
 # fonction pour tasser dans tous les senses
 def Tass(sense, score, table_memory, table):
+    global win
     for i in range(4):
         list_cases = []
         if sense == "Right" or sense == "Left":
@@ -161,6 +170,8 @@ def Tass(sense, score, table_memory, table):
             if list_cases[k] == list_cases[k + 1]:
                 list_cases[k + 1] = 0
                 list_cases[k] = list_cases[k] * 2
+                if list_cases[k] == 2048:
+                    win += 1
                 score += list_cases[k] * 2
         if sense == "Right" or sense == "Down":
             list_cases.reverse()
@@ -207,6 +218,7 @@ def New_case(table_base, table_memory):
 
 # fonction pour afficher le tableau et les scores
 def display():
+    global win
     for x in range(4):
         for y in range(4):
             if table[x][y] == 0:
@@ -223,6 +235,9 @@ def display():
     with open("best_score.txt", 'r') as folder:
         label_best_score.config(text=f"meilleur score:{folder.read()}")
         folder.close()
+    if win == 1:
+        Win_screen()
+        win += 1
     if game_over:
         end_window()
 
