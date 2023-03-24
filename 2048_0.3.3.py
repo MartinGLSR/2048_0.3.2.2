@@ -2,30 +2,37 @@
 Auteur      :Martin Glauser
 Date        :03.02.2023
 Version     :0.3.3
-Desciption  :Création du jeu 2048 en tkinter
+Description  :Création du jeu 2048 en tkinter
 """
-import random
 # moduls
 from tkinter import *
 from random import *
 from tkinter.messagebox import *
 import platform
+import copy
+import os
 
 # constants
 table_color = "#555555"
 colors = {"0": "#777777", "2": "#8a8add", "4": "#7979ff", "8": "#1070e0", "16": "#005ded", "32": "#5a17cd", "64": "#7a19e1", "128": "#8a19e1", "256": "#9011CE", "512": "#9000A5", "1024": "#B10A75", "2048": "#D00060", "4096": "#F01070", "8192": "#FF7700"}
 colors_next_case = {"2": "red", "4": "red"}
+# tableau logique
 table = [[0, 0, 0, 0],
          [0, 0, 0, 0],
          [0, 0, 0, 0],
          [0, 0, 0, 0]]
+
+# tableau visuel
 button_case = [[None, None, None, None],
                [None, None, None, None],
                [None, None, None, None],
                [None, None, None, None]]
+
 background = "#222222"
+font_color = "#ffffff"
+active_font_color = "#fafafa"
 font_family = ""
-# paramétrer la police en fonction de l'os
+# paramétrer la police en fonction de l'OS
 if platform.system() == "Ubuntu":
     font_family = "Ubuntu"
 else:
@@ -34,63 +41,94 @@ font_settings = (font_family, 30)
 font_settings_score = (font_family, 20)
 best_score_folder = open("best_score.txt", "r+")
 # variables
+game_over = False
+if_new_case_color = True
 str_case_number = ""
 score = 0
-next_case = [0,0]
+next_case = [0, 0]
 color_case = ""
 # functions
 
-# cette fonction permet d'afficher une fenêtre pour les paramêtres
-def Settings_box():
-    print("settings")
-def end_window():
-    if askyesno("","Vous avez fini. \n recommencer?"):
-        print("recommencer")
-    else:
-        exit()
-# Cette fonction sera continuée plus tard
-def end_screen():
-    global colors, background, colors_next_case
-    colors = {"0": "#aaaaaa", "2": "#aaaaaa", "4": "#aaaaaa", "8": "#aaaaaa", "16": "#aaaaaa", "32": "#aaaaaa", "64": "#aaaaaa", "128": "#aaaaaa", "256": "#aaaaaa", "512": "#aaaaaa", "1024": "#aaaaaa", "2048": "#aaaaaa", "4096": "#aaaaaa", "8192": "#aaaaaa"}
-    background = "#666666"
+# fonction pour mettre à jour les couleurs de fond
+def refresh_ground():
     frame_text.config(bg=background)
     frame_score.config(bg=background)
-    frame_table.config(bg=background)
     label_score.config(bg=background)
     label_title.config(bg=background)
     label_best_score.config(bg=background)
     button_setting.config(bg=background)
     window.config(bg=background)
+
+# fonction permetant de réinitialiser les meilleur score
+def reboot_best_score():
+    if askyesno("", "Voulez vous vraiment réinitialiser votre meilleur score"):
+        with open(r"best_score.txt", 'w') as folder:
+                folder.write("0")
+                folder.close()
+        display()
+# cette fonction permet d'afficher une fenêtre pour les paramêtres
+def Settings_box():
+    global swindows
+    try:
+        swindows.destroy()
+    except:
+        swindows = Tk()
+        swindows.geometry("300x500")
+        swindows.iconbitmap("settings-10-32.ico")
+        swindows.config(bg=background)
+        swindows.title("settings")
+        frame_reboot_score = Frame(swindows)
+        frame_reboot_score.pack()
+        button_reboot_score = Button(frame_reboot_score, text="réinitialiser le meilleur score", background=background, activebackground=background, bd=0, foreground=font_color, activeforeground=font_color, command=reboot_best_score)
+        button_reboot_score.pack()
+        swindows.mainloop()
+
+# fonction pour afficher un message de fin
+def end_window():
+    global colors, colors_next_case, background, game_over, table, score
+    if askyesno("","Vous avez fini. \n recommencer?"):
+        colors = {"0": "#777777", "2": "#8a8add", "4": "#7979ff", "8": "#1070e0", "16": "#005ded", "32": "#5a17cd", "64": "#7a19e1", "128": "#8a19e1", "256": "#9011CE", "512": "#9000A5", "1024": "#B10A75", "2048": "#D00060", "4096": "#F01070", "8192": "#FF7700"}
+        colors_next_case = {"2": "red", "4": "red"}
+        background = "#222222"
+        game_over = False
+        table = [[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]]
+        refresh_ground()
+        reload_table()
+        display()
+
+    else:
+        exit()
+# fonction pour mettre à jour les couleurs de fin
+def end_screen():
+    global colors, background, colors_next_case
+    colors = {"0": "#aaaaaa", "2": "#aaaaaa", "4": "#aaaaaa", "8": "#aaaaaa", "16": "#aaaaaa", "32": "#aaaaaa", "64": "#aaaaaa", "128": "#aaaaaa", "256": "#aaaaaa", "512": "#aaaaaa", "1024": "#aaaaaa", "2048": "#aaaaaa", "4096": "#aaaaaa", "8192": "#aaaaaa"}
+    background = "#666666"
     colors_next_case = {"2": "#aaaaaa", "4": "#aaaaaa"}
-    #end_window()
 
-# fonction pour afficher "game over" si l'utilisateur n'a plus de posibilités
-# (servira plus tard pour l'écran de fin)
-def Get_if_end(table):
-
-    table_memory = table
-    table_base = table
-    game_over = True
+#calcule si les cases d'un tableau sont les mêmes
+def Get_if_same(table_memory):
+    global game_over
     for i in range(4):
-        #table_memory[i] = tass_4(table_memory)
         for j in range(len(table_memory) - 1):
             if table_memory[i][j] == table_memory[i][j + 1]:
                 game_over = False
+
+# vérifie s'il y a un mouvement possible
+def Get_if_end(table):
+    global game_over
+    game_over = True
+    # vérification horizontale
+    table_memory = copy.deepcopy(table)
+    Get_if_same(table_memory)
+    # vérification verticale
     table_memory = [[], [], [], []]
     for i in range(4):
         for j in range(4):
             table_memory[i].append(table[j][i])
-    for i in range(4):
-        #table_memory[i] = tass_4(table_memory)
-        for j in range(len(table_memory) - 1):
-            if table_memory[i][j] == table_memory[i][j + 1]:
-                game_over = False
+    Get_if_same(table_memory)
     if game_over:
-        print("Game_over")
         end_screen()
-
-
-def replay():
+def reload_table():
     global table, score
     for x in range(2):
         new_case_variable = New_case([], table)
@@ -100,7 +138,10 @@ def Get_key(event):
     if event.keysym in ["Left", "Right", "Up", "Down", "a", "w", "s", "d"]:
         tour(event)
     elif event.keysym == "Escape":
-        exit()
+        if askyesno("","êtes vous sûr de vouloir quitter ?"):
+            exit()
+
+# fonction pour tasser dans tous les senses
 def Tass(sense, score, table_memory, table):
     for i in range(4):
         list_cases = []
@@ -140,6 +181,7 @@ def Tass(sense, score, table_memory, table):
                 table_memory[m].append(list_cases[m])
     return table_memory, score
 
+# fonction pour faire apparaître une nouvelle case
 def New_case(table_base, table_memory):
     free_cases_x = []
     free_cases_y = []
@@ -163,6 +205,7 @@ def New_case(table_base, table_memory):
         next_case = [10,10]
     return table_memory, next_case, not_free_cases
 
+# fonction pour afficher le tableau et les scores
 def display():
     for x in range(4):
         for y in range(4):
@@ -180,16 +223,21 @@ def display():
     with open("best_score.txt", 'r') as folder:
         label_best_score.config(text=f"meilleur score:{folder.read()}")
         folder.close()
+    if game_over:
+        end_window()
 
+# fonction pour enlever les 0
 def tass_4(list_c):
     for k in range(4 - len(list_c)):
         list_c.append(0)
     return list_c
+
+# fonction globale d'action l'or d'un mouvement
 def tour(event):
+    # définition des variables
     global table, score, next_case
     sense = ""
     table_memory = []
-    list_cases = []
     table_base = []
     lst = []
     for i in range(4):
@@ -209,8 +257,6 @@ def tour(event):
     elif event.keysym == "Down" or event.keysym == "s":
         sense = "Down"
         table_memory = [[], [], [], []]
-    elif event.keysym == "Escape":
-        exit()
     # ajouter les valeurs du tableau à la liste list_case
     tass_variable = Tass(sense, score, table_memory, table)
     table_memory = tass_variable[0]
@@ -220,7 +266,6 @@ def tour(event):
     table = new_case_variable[0]
     next_case = new_case_variable[1]
     if new_case_variable[2]:
-        print("plus de cases vides")
         Get_if_end(table)
     # ajouter et charger les modifications au tableau
     table = table_memory
@@ -232,7 +277,7 @@ def tour(event):
                     folder.close()
     display()
 # ajout des deux premières cases
-replay()
+reload_table()
 # window structure
 window = Tk()
 window.title("2048")
@@ -251,6 +296,7 @@ label_score.pack(side=LEFT, padx=30)
 setting_icon = PhotoImage(file="settings-10-64.png")
 button_setting = Button(frame_score, image=setting_icon, background=background, bd=0, activebackground=background, command=Settings_box)
 button_setting.pack(side=RIGHT, padx=30)
+# définition des scores
 with open("best_score.txt", 'r') as folder:
     label_best_score = Label(frame_score, text=f"meilleur score:{folder.read()}", fg="white", bg=background, font=font_settings_score)
     label_best_score.pack(side=RIGHT, padx=30)
@@ -272,15 +318,8 @@ window.mainloop()
 # ajouter l'apparition aléatoire des 4                                                              fait
 # ajouter la les meilleurs scores                                                                   fait
 # aficher la case qui vient d'apparaître                                                            fait
-# ajouter des paramètres                                                                            à faire
-# aficher un écran de fin lorsque il n'y a plus de possibilités ou que le joueur a ateint 8192      à faire
-# optionnel:                                                                                        à faire
+# ajouter des paramètres                                                                            fait
+# aficher un écran de fin lorsque il n'y a plus de possibilités ou que le joueur a ateint 8192      fait
+# optionnel:
 #   ajouter une annimation de déplacement                                                           à faire
 #   ajouter des coins arrondis aux cases                                                            à faire
-
-
-
-
-#master case
-#grid fusion
-#call of grid
